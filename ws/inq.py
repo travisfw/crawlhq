@@ -26,12 +26,16 @@ from handlers import DiscoveredHandler
 class CrawlJob(object):
     def __init__(self, jobconfig, maxqueuesize=4*1000*1000):
         self.jobconfig = jobconfig
-        self.enq = FileEnqueue(qdir=hqconfig.inqdir(self.jobconfig.name),
-                               suffix=os.getpid(),
-                               maxsize=maxqueuesize,
-                               buffer=1000,
-                               executor=None,
-                               gzip=9)
+        self.enqs = []
+        for p in range(4):
+            self.enqs.append(
+                FileEnqueue(qdir=hqconfig.inqdir(self.jobconfig.name) +("/%d"%p)),
+                        suffix=os.getpid(),
+                        maxsize=maxqueuesize,
+                        buffer=1000,
+                        executor=None,
+                        gzip=9)
+                )
 
     def discovered(self, curis):
         self.enq.queue(curis)
